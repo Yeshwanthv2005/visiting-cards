@@ -31,7 +31,15 @@ app.add_middleware(
 ollama = OllamaService()
 gemini = GeminiService()
 sheet_id = os.getenv("GOOGLE_SHEET_ID")
-cred_file = os.getenv("CREDENTIALS_FILE", "credentials.json")
+
+# Smart detect Render credentials path
+cred_file = os.getenv("CREDENTIALS_FILE")
+if not cred_file:
+    if os.path.exists("/etc/secrets/credentials.json"):
+        cred_file = "/etc/secrets/credentials.json"
+    else:
+        cred_file = "credentials.json"
+
 sheets = SheetService(cred_file, sheet_id)
 backend_host = os.getenv("BACKEND_HOST", "0.0.0.0")
 backend_port = _env_int("PORT", _env_int("BACKEND_PORT", 8000))
