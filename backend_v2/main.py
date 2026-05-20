@@ -2,6 +2,7 @@ from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import os
+import traceback
 from dotenv import load_dotenv
 from services.ollama_service import OllamaService
 from services.gemini_service import GeminiService
@@ -82,6 +83,7 @@ async def extract_card(
             "data": data
         }
     except Exception as e:
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/sync")
@@ -101,6 +103,7 @@ async def sync_to_sheet(data: dict):
         sl_no = sheets.append_card(data)
         return {"success": True, "sl_no": sl_no}
     except Exception as e:
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/data")
@@ -112,6 +115,7 @@ async def get_sheet_data():
         data = sheets.get_all_data()
         return {"success": True, "data": data}
     except Exception as e:
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
