@@ -24,6 +24,10 @@ class SheetService:
                 else:
                     base_dir = Path(__file__).resolve().parent.parent.parent
                     cred_path = base_dir / self.credentials_file
+
+                # Ultimate Fallback for Render Secret Files
+                if not cred_path.exists() and os.path.exists("/etc/secrets/credentials.json"):
+                    cred_path = Path("/etc/secrets/credentials.json")
                 
                 creds = ServiceAccountCredentials.from_json_keyfile_name(str(cred_path), self.scope)
                 client = gspread.authorize(creds)
