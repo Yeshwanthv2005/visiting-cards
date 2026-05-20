@@ -1,15 +1,22 @@
 import requests
 import base64
 import json
+import os
 
 class OllamaService:
     def __init__(self, base_url="http://localhost:11434"):
         self.base_url = base_url
+        self.api_key = os.getenv("OLLAMA_API_KEY", "")
 
     def _generate(self, payload):
+        headers = {}
+        if self.api_key:
+            headers["Authorization"] = f"Bearer {self.api_key}"
+            
         response = requests.post(
             f"{self.base_url}/api/generate",
             json=payload,
+            headers=headers,
             timeout=300
         )
         response.raise_for_status()
