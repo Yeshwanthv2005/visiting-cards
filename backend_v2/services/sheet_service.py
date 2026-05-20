@@ -19,9 +19,11 @@ class SheetService:
     def _connect(self):
         if not self.sheet:
             try:
-                # Resolve path relative to backend or current working directory
-                base_dir = Path(__file__).resolve().parent.parent.parent
-                cred_path = base_dir / self.credentials_file
+                if os.path.isabs(self.credentials_file):
+                    cred_path = Path(self.credentials_file)
+                else:
+                    base_dir = Path(__file__).resolve().parent.parent.parent
+                    cred_path = base_dir / self.credentials_file
                 
                 creds = ServiceAccountCredentials.from_json_keyfile_name(str(cred_path), self.scope)
                 client = gspread.authorize(creds)
