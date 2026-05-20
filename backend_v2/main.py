@@ -4,6 +4,7 @@ import uvicorn
 import os
 from dotenv import load_dotenv
 from services.ollama_service import OllamaService
+from services.gemini_service import GeminiService
 from services.sheet_service import SheetService
 import json
 
@@ -28,6 +29,7 @@ app.add_middleware(
 
 # Initialize Services
 ollama = OllamaService()
+gemini = GeminiService()
 sheet_id = os.getenv("GOOGLE_SHEET_ID")
 cred_file = os.getenv("CREDENTIALS_FILE", "credentials.json")
 sheets = SheetService(cred_file, sheet_id)
@@ -51,7 +53,8 @@ async def extract_card(
     """
     1. Receive image from mobile app
     2. Extract data via local Ollama model
-    3. Return extracted JSON to app
+    3. If Ollama fails, fallback to Gemini API
+    4. Return extracted JSON to app
     """
     try:
         contents = await file.read()
@@ -60,7 +63,11 @@ async def extract_card(
         data, error = await ollama.extract_card_data(contents, model_name=model)
         
         if error:
-            raise HTTPException(status_code=500, detail=f"AI Extraction Error: {error}")
+            print(f"Ollama Failed: {error}. Falling back to Gemini...")
+            data, error = await gemini.extract_card_data(contents)
+            
+        if error:
+            raise HTTPException(status_code=500, detail=f"AI Extraction Error (All models failed): {error}")
             
         return {
             "success": True,
