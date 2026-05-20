@@ -27,3 +27,5 @@ node_modules/
 *.swp
 *.swo
 *~
+visiting_cards/
+visiting_cards_cards_processed/
